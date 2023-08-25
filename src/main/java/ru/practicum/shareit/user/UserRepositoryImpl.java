@@ -37,7 +37,7 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public UserDto getUserById(Long id) {
         for (UserDto user : users) {
-            if (user.getId() == id) {
+            if (user.getId().equals(id)) {
                 log.info("найден user" + user);
                 return user;
             }
