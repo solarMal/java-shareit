@@ -57,7 +57,7 @@ public class ItemServiceImpl implements ItemService {
             existingItem.setDescription(updatedItem.getDescription());
         }
 
-        if(updatedItem.getAvailable() != null){
+        if (updatedItem.getAvailable() != null) {
             existingItem.setAvailable(updatedItem.getAvailable());
         }
 

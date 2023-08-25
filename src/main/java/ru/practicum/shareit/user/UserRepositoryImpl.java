@@ -20,7 +20,7 @@ public class UserRepositoryImpl implements UserRepository {
             return null;
         }
 
-        if (user.getId() == null){
+        if (user.getId() == null) {
             user.setId(nextId++);
         }
         log.info("user сохранён " + user);
@@ -36,8 +36,8 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public UserDto getUserById(Long id) {
-        for (UserDto user : users){
-            if (user.getId() == id){
+        for (UserDto user : users) {
+            if (user.getId() == id) {
                 log.info("найден user" + user);
                 return user;
             }

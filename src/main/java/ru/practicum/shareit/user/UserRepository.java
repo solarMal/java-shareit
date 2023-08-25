@@ -6,8 +6,12 @@ import java.util.List;
 
 public interface UserRepository {
     UserDto save(UserDto userDto);
+
     List<UserDto> findAllUsers();
+
     UserDto getUserById(Long id);
+
     UserDto updateUser(Long id, UserDto userDto);
+
     void deleteUserById(int id);
 }
