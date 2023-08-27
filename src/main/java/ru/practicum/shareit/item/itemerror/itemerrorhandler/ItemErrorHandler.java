@@ -1,7 +1,6 @@
 package ru.practicum.shareit.item.itemerror.itemerrorhandler;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -28,13 +27,13 @@ public class ItemErrorHandler {
 
     @ExceptionHandler(ErrorOwnerException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ItemErrorResponse errorOwnerException(ErrorOwnerException e){
+    public ItemErrorResponse errorOwnerException(ErrorOwnerException e) {
         return new ItemErrorResponse(e.getMessage());
     }
 
     @ExceptionHandler(ExistingItemException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ItemErrorResponse existingItemException(ExistingItemException e){
+    public ItemErrorResponse existingItemException(ExistingItemException e) {
         return new ItemErrorResponse(e.getMessage());
     }
 
