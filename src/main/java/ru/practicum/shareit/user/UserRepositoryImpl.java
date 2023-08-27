@@ -2,6 +2,9 @@ package ru.practicum.shareit.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import ru.practicum.shareit.user.usererror.InvalidEmailException;
+import ru.practicum.shareit.user.usererror.UserAlreadyExistException;
+import ru.practicum.shareit.user.usererror.UserNotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.ArrayList;
@@ -17,7 +20,7 @@ public class UserRepositoryImpl implements UserRepository {
     public UserDto save(UserDto user) {
         if (isEmailAlreadyUsed(user.getEmail())) {
             log.warn("Пользователь с такой электронной почтой уже существует");
-            return null;
+            throw new InvalidEmailException("Пользователь с такой электронной почтой уже существует");
         }
 
         if (user.getId() == null) {
@@ -51,18 +54,18 @@ public class UserRepositoryImpl implements UserRepository {
         UserDto existingUser = getUserById(id);
 
         if (existingUser == null) {
-            throw new IllegalArgumentException("User with id " + id + " not found");
+            throw new UserAlreadyExistException("User with id " + id + " not found");
         }
 
         if (!existingUser.getEmail().equals(updatedUser.getEmail()) && isEmailAlreadyTaken(updatedUser.getEmail())) {
-            throw new IllegalArgumentException("User with email " + updatedUser.getEmail() + " already exists");
+            throw new UserAlreadyExistException("User with email " + updatedUser.getEmail() + " already exists");
         }
 
-        if (updatedUser.getName() != null) {
+        if (updatedUser.getName() != null && !updatedUser.getName().isEmpty()) {
             existingUser.setName(updatedUser.getName());
         }
 
-        if (updatedUser.getEmail() != null) {
+        if (updatedUser.getEmail() != null && !updatedUser.getEmail().isEmpty()) {
             existingUser.setEmail(updatedUser.getEmail());
         }
 
@@ -90,7 +93,7 @@ public class UserRepositoryImpl implements UserRepository {
         if (userToRemove != null) {
             users.remove(userToRemove);
         } else {
-            throw new IllegalArgumentException("User with id " + id + " not found");
+            throw new UserNotFoundException("User with id " + id + " not found");
         }
     }
 

@@ -5,8 +5,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.itemerror.DescriptionIsRequiredException;
+import ru.practicum.shareit.item.itemerror.ErrorOwnerException;
+import ru.practicum.shareit.item.itemerror.ExistingItemException;
+import ru.practicum.shareit.item.itemerror.ItemIsNotAvailableException;
 import ru.practicum.shareit.user.UserRepository;
 import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.usererror.UserNotFoundException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,15 +27,15 @@ public class ItemServiceImpl implements ItemService {
         UserDto owner = userRepository.getUserById(userId);
 
         if (owner == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with id " + userId + " not found");
+            throw new UserNotFoundException("User with id " + userId + " not found");
         }
 
         if (itemDto.getAvailable() == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Item is not available");
+            throw new ItemIsNotAvailableException("Item is not available");
         }
 
         if (itemDto.getDescription() == null || itemDto.getDescription().isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Description is required");
+            throw new DescriptionIsRequiredException("Description is required");
         }
 
         itemDto.setOwner(owner);
@@ -42,11 +47,11 @@ public class ItemServiceImpl implements ItemService {
         ItemDto existingItem = itemRepository.getItemById(itemId);
 
         if (existingItem == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item with id " + itemId + " not found");
+            throw new ExistingItemException("Item with id " + itemId + " not found");
         }
 
         if (!existingItem.getOwner().getId().equals(userId)) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not the owner of the item");
+            throw new ErrorOwnerException("User is not the owner of the item");
         }
 
         if (updatedItem.getName() != null) {
