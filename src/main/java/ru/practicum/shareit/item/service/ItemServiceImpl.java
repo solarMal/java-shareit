@@ -123,13 +123,14 @@ public class ItemServiceImpl implements ItemService {
         return items.stream()
                 .map(ItemMapper::convertToDto)
                 .peek(itemDto -> {
-                    Optional<Booking> lastBooking = Optional.ofNullable
-                            (bookingService.getLastBookingForItem(itemDto.getId()));
-                    lastBooking.ifPresent(booking -> itemDto.setLastBooking(BookingMapper.convertToLastBookingDto(lastBooking.get())));
+                    Optional<Booking> lastBooking = Optional.ofNullable(
+                            bookingService.getLastBookingForItem(itemDto.getId()));
+                    lastBooking.ifPresent(booking -> itemDto.setLastBooking(
+                            BookingMapper.convertToLastBookingDto(lastBooking.get())));
                 })
                 .peek(itemDto -> {
-                    Optional<Booking> nextBooking = Optional.ofNullable
-                            (bookingService.getNextBookingForItem(itemDto.getId()));
+                    Optional<Booking> nextBooking = Optional.ofNullable(
+                            bookingService.getNextBookingForItem(itemDto.getId()));
                     nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToNextBookingDto(nextBooking.get())));
                 })
                 .peek(itemDto -> itemDto.setComments(
