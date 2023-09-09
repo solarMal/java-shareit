@@ -1,0 +1,36 @@
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS items;
+DROP TABLE IF EXISTS bookings;
+DROP TABLE IF EXISTS comments;
+
+CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR NOT NULL,
+    email VARCHAR NOT NULL,
+    CONSTRAINT user_email UNIQUE (email)
+);
+
+CREATE TABLE IF NOT EXISTS items (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    description VARCHAR(200) NOT NULL,
+    is_available BOOLEAN DEFAULT TRUE NOT NULL,
+    owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS bookings (
+    id SERIAL PRIMARY KEY,
+    rental_start TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    rental_end TIMESTAMP WITHOUT TIME ZONE NOT NULL,
+    booker_id INTEGER REFERENCES users(id) NOT NULL,
+    item_id INTEGER REFERENCES items(id) ON DELETE CASCADE,
+    status INTEGER
+);
+
+CREATE TABLE IF NOT EXISTS comments (
+    id SERIAL PRIMARY KEY,
+    item_id INTEGER REFERENCES items(id) ON DELETE CASCADE,
+    author_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    comment_text VARCHAR(500),
+    creation_date TIMESTAMP
+);
