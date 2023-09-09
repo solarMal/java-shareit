@@ -76,24 +76,24 @@ public class BookingServiceImpl implements BookingService {
                 resultList = bookingRepository.findAllByBooker_IdOrderByStartDesc(userId);
                 break;
             case "CURRENT":
-                resultList = bookingRepository.findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByStartBeforeAndEndIsAfterAndBooker_IdIsOrderByStartDesc(
+                        LocalDateTime.now(), LocalDateTime.now(), userId);
                 break;
             case "PAST":
-                resultList = bookingRepository.findAllByEndBeforeAndBooker_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByEndBeforeAndBooker_IdIsOrderByStartDesc(
+                        LocalDateTime.now(), userId);
                 break;
             case "FUTURE":
-                resultList = bookingRepository.findAllByStartIsAfterAndBooker_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByStartIsAfterAndBooker_IdIsOrderByStartDesc(
+                        LocalDateTime.now(), userId);
                 break;
             case "WAITING":
-                resultList = bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc
-                        (Status.WAITING, userId);
+                resultList = bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc(
+                        Status.WAITING, userId);
                 break;
             case "REJECTED":
-                resultList = bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc
-                        (Status.REJECTED, userId);
+                resultList = bookingRepository.findAllByStatusAndBooker_IdIsOrderByStartDesc(
+                        Status.REJECTED, userId);
                 break;
             default:
                 throw new UnknownStateException("Unknown state: " + state);
@@ -114,24 +114,24 @@ public class BookingServiceImpl implements BookingService {
                 resultList = bookingRepository.findAllByItem_Owner_IdOrderByStartDesc(userId);
                 break;
             case "CURRENT":
-                resultList = bookingRepository.findAllByStartBeforeAndEndIsAfterAndItem_Owner_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByStartBeforeAndEndIsAfterAndItem_Owner_IdIsOrderByStartDesc(
+                        LocalDateTime.now(), LocalDateTime.now(), userId);
                 break;
             case "PAST":
-                resultList = bookingRepository.findAllByEndBeforeAndItem_Owner_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByEndBeforeAndItem_Owner_IdIsOrderByStartDesc(
+                        LocalDateTime.now(), userId);
                 break;
             case "FUTURE":
-                resultList = bookingRepository.findAllByStartIsAfterAndItem_Owner_IdIsOrderByStartDesc
-                        (LocalDateTime.now(), userId);
+                resultList = bookingRepository.findAllByStartIsAfterAndItem_Owner_IdIsOrderByStartDesc(
+                        LocalDateTime.now(), userId);
                 break;
             case "WAITING":
-                resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc
-                        (Status.WAITING, userId);
+                resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc(
+                        Status.WAITING, userId);
                 break;
             case "REJECTED":
-                resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc
-                        (Status.REJECTED, userId);
+                resultList = bookingRepository.findAllByStatusAndItem_Owner_IdIsOrderByStartDesc(
+                        Status.REJECTED, userId);
                 break;
             default:
                 throw new UnknownStateException("Unknown state: " + state);

@@ -86,10 +86,10 @@ public class ItemServiceImpl implements ItemService {
         ItemDto itemDto = utils.convertToDto(item);
 
         if (item.getOwner().getId() == userId) {
-            Optional<Booking> lastBooking = Optional.ofNullable
-                    (bookingService.getLastBookingForItem(itemDto.getId()));
-            Optional<Booking> nextBooking = Optional.ofNullable
-                    (bookingService.getNextBookingForItem(itemDto.getId()));
+            Optional<Booking> lastBooking = Optional.ofNullable(
+                    bookingService.getLastBookingForItem(itemDto.getId()));
+            Optional<Booking> nextBooking = Optional.ofNullable(
+                    bookingService.getNextBookingForItem(itemDto.getId()));
             lastBooking.ifPresent(booking -> itemDto.setLastBooking(BookingMapper.convertToLastBookingDto(lastBooking.get())));
             nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToNextBookingDto(nextBooking.get())));
         }
@@ -169,7 +169,6 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public void deleteUserItems(long userId) {
-        //проверка наличия пользователя отсутствует потому что метод вызывается после удаления пользователя
         log.debug("Sending to DAO request to delete user id {} items.", userId);
         itemRepository.deleteById(userId);
     }
