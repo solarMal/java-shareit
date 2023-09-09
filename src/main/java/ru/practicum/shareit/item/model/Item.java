@@ -1,29 +1,33 @@
 package ru.practicum.shareit.item.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import ru.practicum.shareit.user.dto.UserDto;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+import ru.practicum.shareit.user.model.User;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
-/**
- * TODO Sprint add-controllers.
- */
+@Entity
+@NoArgsConstructor
 @Data
-@AllArgsConstructor
+@Table(name = "items")
 public class Item {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @NotBlank(message = "Name is required")
+    @NotNull
+    @Column(name = "name", nullable = false)
     private String name;
-
-    @NotBlank(message = "Description is required")
+    @NotNull
+    @Column(name = "description", nullable = false)
     private String description;
+    @Column(name = "isAvailable", nullable = false)
+    private Boolean isAvailable;
 
-    @Valid
-    private UserDto owner;
-
-    private Long request;
-    private Boolean available;
+    @JoinColumn(name = "owner_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private User owner;
 }
