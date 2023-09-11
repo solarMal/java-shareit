@@ -29,6 +29,7 @@ public class Booking {
     @OneToOne(fetch = FetchType.EAGER)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Item item;
+    @Enumerated
     @Column(name = "status")
     private Status status;
 }

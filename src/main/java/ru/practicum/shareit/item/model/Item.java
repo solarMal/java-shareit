@@ -17,10 +17,10 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    @NotNull
+
     @Column(name = "name", nullable = false)
     private String name;
-    @NotNull
+
     @Column(name = "description", nullable = false)
     private String description;
     @Column(name = "isAvailable", nullable = false)

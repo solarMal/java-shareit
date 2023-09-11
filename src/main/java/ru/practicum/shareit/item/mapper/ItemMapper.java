@@ -3,7 +3,7 @@ package ru.practicum.shareit.item.mapper;
 import ru.practicum.shareit.item.Comment.model.Comment;
 import ru.practicum.shareit.item.Comment.model.CommentDto;
 import ru.practicum.shareit.item.model.Item;
-import ru.practicum.shareit.item.model.dto.ItemDto;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.user.model.User;
 
 public class ItemMapper {

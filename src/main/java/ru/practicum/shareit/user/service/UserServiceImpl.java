@@ -2,11 +2,13 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exceptions.model.HandleDuplicatedEmailException;
 import ru.practicum.shareit.exceptions.model.NotFoundException;
 import ru.practicum.shareit.user.dao.UserRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.model.dto.UserDto;
+import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.service.utils.UserServiceUtils;
 
 import javax.transaction.Transactional;
@@ -24,12 +26,17 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public UserDto createUser(UserDto userDto) {
         utils.checkIsUserValid(userDto);
+        utils.checkEmailForValid(userDto);
 
         User user = utils.convertToUser(userDto);
 
         log.debug("Sending to DAO information to add new user.");
-
-        return utils.convertToDto(userRepository.save(user));
+        try {
+            User savedUser = userRepository.save(user);
+            return utils.convertToDto(userRepository.save(savedUser));
+        } catch (DataIntegrityViolationException ex) {
+            throw new HandleDuplicatedEmailException("user is already taken");
+        }
     }
 
     @Override
