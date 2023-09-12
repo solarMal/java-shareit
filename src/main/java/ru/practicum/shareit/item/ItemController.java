@@ -1,64 +1,66 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
+import ru.practicum.shareit.item.Comment.model.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.service.ItemService;
 
-import javax.validation.Valid;
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/items")
+@RequiredArgsConstructor
+@Slf4j
 public class ItemController {
     private final ItemService itemService;
 
     @PostMapping
-    public ResponseEntity<ItemDto> createItem(
-            @RequestHeader("X-Sharer-User-Id") Long userId,
-            @Valid @RequestBody ItemDto itemDto) {
-        ItemDto createdItem = itemService.createItem(userId, itemDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdItem);
+    public ItemDto addItem(@RequestHeader("X-Sharer-User-Id") long userId,
+                           @RequestBody ItemDto itemDto) {
+        log.debug("Received request to add new Item from user {}.", userId);
+
+        return itemService.addItem(userId, itemDto);
+    }
+
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@RequestHeader("X-Sharer-User-Id") long userId,
+                                 @PathVariable(value = "itemId") long itemId,
+                                 @RequestBody CommentDto commentDto) {
+        log.debug("Received request to add new comment from user {} to item {}.", userId, itemId);
+        return itemService.addComment(userId, itemId, commentDto);
     }
 
     @PatchMapping("/{itemId}")
-    public ResponseEntity<ItemDto> updateItem(
-            @PathVariable Long itemId,
-            @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestBody ItemDto updatedItem) {
-        ItemDto updatedItemDto = itemService.updateItem(itemId, userId, updatedItem);
-        return ResponseEntity.ok(updatedItemDto);
+    public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") long userId,
+                              @RequestBody ItemDto itemDto,
+                              @PathVariable(value = "itemId") long itemId) {
+        log.debug("Received request to update existed Item with id {} from user id {}.", itemId, userId);
+        itemDto.setId(itemId);
+        return itemService.updateItem(userId, itemDto);
     }
 
     @GetMapping("/{itemId}")
-    public ResponseEntity<ItemDto> getItemById(@PathVariable Long itemId) {
-        ItemDto itemDto = itemService.getItemById(itemId);
+    public ItemDto getById(@RequestHeader("X-Sharer-User-Id") long userId,
+                           @PathVariable(value = "itemId") long itemId) {
+        log.debug("Received request to get existed Item with id {}.", itemId);
 
-        if (itemDto == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Item with id " + itemId + " not found");
-        }
-
-        return ResponseEntity.ok(itemDto);
+        return itemService.getItemDtoById(itemId, userId);
     }
 
-    @GetMapping()
-    public ResponseEntity<List<ItemDto>> getItemsByOwner(@RequestHeader("X-Sharer-User-Id") Long userId) {
-        List<ItemDto> itemsByOwner = itemService.getItemsByOwner(userId);
-        return ResponseEntity.ok(itemsByOwner);
+    @GetMapping
+    public List<ItemDto> getUserItems(@RequestHeader("X-Sharer-User-Id") long userId) {
+        log.debug("Received request to get items list by user id {}.", userId);
+
+        return itemService.getItemsByUserId(userId);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ItemDto>> searchItemsByText(
-            @RequestParam("text") String searchText,
-            @RequestHeader("X-Sharer-User-Id") Long userId) {
-        List<ItemDto> matchingItems = itemService.searchItemsByText(searchText, userId);
-        return ResponseEntity.ok(matchingItems);
+    public List<ItemDto> searchForItems(@RequestParam String text) {
+        log.debug("Received request for search items by description with text: \"{}\"", text);
+
+        return itemService.searchInDescription(text);
     }
 
 }
