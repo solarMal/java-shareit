@@ -15,9 +15,10 @@ import java.util.List;
 @Slf4j
 public class ItemController {
     private final ItemService itemService;
+    private final String HTTP_HEADER_USER_ID = "X-Sharer-User-Id";
 
     @PostMapping
-    public ItemDto addItem(@RequestHeader("X-Sharer-User-Id") long userId,
+    public ItemDto addItem(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
                            @RequestBody ItemDto itemDto) {
         log.debug("Received request to add new Item from user {}.", userId);
 
@@ -25,7 +26,7 @@ public class ItemController {
     }
 
     @PostMapping("/{itemId}/comment")
-    public CommentDto addComment(@RequestHeader("X-Sharer-User-Id") long userId,
+    public CommentDto addComment(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
                                  @PathVariable(value = "itemId") long itemId,
                                  @RequestBody CommentDto commentDto) {
         log.debug("Received request to add new comment from user {} to item {}.", userId, itemId);
@@ -33,7 +34,7 @@ public class ItemController {
     }
 
     @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") long userId,
+    public ItemDto updateItem(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
                               @RequestBody ItemDto itemDto,
                               @PathVariable(value = "itemId") long itemId) {
         log.debug("Received request to update existed Item with id {} from user id {}.", itemId, userId);
@@ -42,7 +43,7 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getById(@RequestHeader("X-Sharer-User-Id") long userId,
+    public ItemDto getById(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
                            @PathVariable(value = "itemId") long itemId) {
         log.debug("Received request to get existed Item with id {}.", itemId);
 
@@ -50,16 +51,24 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getUserItems(@RequestHeader("X-Sharer-User-Id") long userId) {
+    public List<ItemDto> getUserItems(@RequestHeader(HTTP_HEADER_USER_ID) long userId,
+                                      @RequestParam(value = "from", required = false) Integer from,
+                                      @RequestParam(value = "size", required = false) Integer size) {
         log.debug("Received request to get items list by user id {}.", userId);
-
+        if (from != null && size != null) {
+            return itemService.getItemsByUserIdPagination(userId, from, size);
+        }
         return itemService.getItemsByUserId(userId);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchForItems(@RequestParam String text) {
+    public List<ItemDto> searchForItems(@RequestParam String text,
+                                        @RequestParam(value = "from", required = false) Integer from,
+                                        @RequestParam(value = "size", required = false) Integer size) {
         log.debug("Received request for search items by description with text: \"{}\"", text);
-
+        if (from != null && size != null) {
+            return itemService.searchInDescriptionPagination(text, from, size);
+        }
         return itemService.searchInDescription(text);
     }
 

@@ -2,11 +2,14 @@ package ru.practicum.shareit.item.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exceptions.model.NotFoundException;
+import ru.practicum.shareit.exceptions.model.ValidationException;
 import ru.practicum.shareit.item.Comment.CommentRepository;
 import ru.practicum.shareit.item.Comment.model.Comment;
 import ru.practicum.shareit.item.Comment.model.CommentDto;
@@ -86,12 +89,12 @@ public class ItemServiceImpl implements ItemService {
         ItemDto itemDto = utils.convertToDto(item);
 
         if (item.getOwner().getId() == userId) {
-            Optional<Booking> lastBooking = Optional.ofNullable(
-                    bookingService.getLastBookingForItem(itemDto.getId()));
-            Optional<Booking> nextBooking = Optional.ofNullable(
-                    bookingService.getNextBookingForItem(itemDto.getId()));
-            lastBooking.ifPresent(booking -> itemDto.setLastBooking(BookingMapper.convertToLastBookingDto(lastBooking.get())));
-            nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToNextBookingDto(nextBooking.get())));
+            Optional<Booking> lastBooking = Optional.ofNullable
+                    (bookingService.getLastBookingForItem(itemDto.getId()));
+            Optional<Booking> nextBooking = Optional.ofNullable
+                    (bookingService.getNextBookingForItem(itemDto.getId()));
+            lastBooking.ifPresent(booking -> itemDto.setLastBooking(BookingMapper.convertToBookingLink(lastBooking.get())));
+            nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToBookingLink(nextBooking.get())));
         }
 
         itemDto.setComments(
@@ -122,22 +125,64 @@ public class ItemServiceImpl implements ItemService {
 
         return items.stream()
                 .map(ItemMapper::convertToDto)
-                .peek(itemDto -> {
-                    Optional<Booking> lastBooking = Optional.ofNullable(
-                            bookingService.getLastBookingForItem(itemDto.getId()));
-                    lastBooking.ifPresent(booking -> itemDto.setLastBooking(
-                            BookingMapper.convertToLastBookingDto(lastBooking.get())));
+                .map(itemDto -> {
+                    Optional<Booking> lastBooking = Optional.ofNullable
+                            (bookingService.getLastBookingForItem(itemDto.getId()));
+                    lastBooking.ifPresent(booking -> itemDto.setLastBooking(BookingMapper.convertToBookingLink(lastBooking.get())));
+                    return itemDto;
                 })
-                .peek(itemDto -> {
-                    Optional<Booking> nextBooking = Optional.ofNullable(
-                            bookingService.getNextBookingForItem(itemDto.getId()));
-                    nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToNextBookingDto(nextBooking.get())));
+                .map(itemDto -> {
+                    Optional<Booking> nextBooking = Optional.ofNullable
+                            (bookingService.getNextBookingForItem(itemDto.getId()));
+                    nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToBookingLink(nextBooking.get())));
+                    return itemDto;
                 })
-                .peek(itemDto -> itemDto.setComments(
-                        commentRepository.findAllByItem_IdOrderByIdDesc(itemDto.getId()).stream()
-                                .map(ItemMapper::convertToDto)
-                                .collect(Collectors.toList())
-                ))
+                .map(itemDto -> {
+                    itemDto.setComments(
+                            commentRepository.findAllByItem_IdOrderByIdDesc(itemDto.getId()).stream()
+                                    .map(ItemMapper::convertToDto)
+                                    .collect(Collectors.toList()));
+                    return itemDto;
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public List<ItemDto> getItemsByUserIdPagination(long userId, int from, int size) {
+        userService.checkIsUserPresent(userId);
+        if (from < 0) {
+            throw new ValidationException("From value can not be negative.");
+        }
+        if (size < 1) {
+            throw new ValidationException("Size is too small.");
+        }
+
+        log.debug("Sending to DAO request for get items by user id {} pagination.", userId);
+
+        Page<Item> items = itemRepository.findAllByOwner_IdOrderByIdAsc(userId, PageRequest.of(from / size, size));
+
+        return items.stream()
+                .map(ItemMapper::convertToDto)
+                .map(itemDto -> {
+                    Optional<Booking> lastBooking = Optional.ofNullable
+                            (bookingService.getLastBookingForItem(itemDto.getId()));
+                    lastBooking.ifPresent(booking -> itemDto.setLastBooking(BookingMapper.convertToBookingLink(lastBooking.get())));
+                    return itemDto;
+                })
+                .map(itemDto -> {
+                    Optional<Booking> nextBooking = Optional.ofNullable
+                            (bookingService.getNextBookingForItem(itemDto.getId()));
+                    nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToBookingLink(nextBooking.get())));
+                    return itemDto;
+                })
+                .map(itemDto -> {
+                    itemDto.setComments(
+                            commentRepository.findAllByItem_IdOrderByIdDesc(itemDto.getId()).stream()
+                                    .map(ItemMapper::convertToDto)
+                                    .collect(Collectors.toList()));
+                    return itemDto;
+                })
                 .collect(Collectors.toList());
     }
 
@@ -149,6 +194,28 @@ public class ItemServiceImpl implements ItemService {
             return new ArrayList<>();
         }
         List<Item> items = itemRepository.findAllByDescriptionContainsIgnoreCase(text);
+
+        return items.stream()
+                .filter(Item::getIsAvailable)
+                .map(ItemMapper::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public List<ItemDto> searchInDescriptionPagination(String text, int from, int size) {
+        log.debug("Sending to DAO request to search items by text \"{}\" (pagination).", text);
+        if (from < 0) {
+            throw new ValidationException("From value can not be negative.");
+        }
+        if (size < 1) {
+            throw new ValidationException("Size is too small.");
+        }
+        if (text.isBlank()) {
+            return new ArrayList<>();
+        }
+        Page<Item> items = itemRepository.findAllByDescriptionContainsIgnoreCase
+                (text, PageRequest.of(from / size, size));
 
         return items.stream()
                 .filter(Item::getIsAvailable)
@@ -170,7 +237,17 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public void deleteUserItems(long userId) {
+        //проверка наличия пользователя отсутствует потому что метод вызывается после удаления пользователя
         log.debug("Sending to DAO request to delete user id {} items.", userId);
         itemRepository.deleteById(userId);
+    }
+
+    @Override
+    @Transactional
+    public List<ItemDto> getItemsForRequest(long requestId) {
+        log.debug("Sending to DAO request to get items for request {}.", requestId);
+        return itemRepository.findAllByRequest(requestId).stream()
+                .map(ItemMapper::convertToDto)
+                .collect(Collectors.toList());
     }
 }

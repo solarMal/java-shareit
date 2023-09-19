@@ -37,18 +37,6 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ErrorResponse errorResponse(InvalidEmailException e) {
-        return new ErrorResponse(e.getMessage(), BAD_REQUEST.toString());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ErrorResponse errorResponse(HandleDuplicatedEmailException e) {
-        return new ErrorResponse(e.getMessage(), CONFLICT.toString());
-    }
-
-    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse errorResponse(Throwable e) {
         log.debug("Returning {} answer with message: {}", INTERNAL_SERVER_ERROR, e.getMessage());
@@ -82,6 +70,4 @@ public class ErrorHandler {
         log.debug("Returning {} answer with message: {}", INTERNAL_SERVER_ERROR, e.getMessage());
         return new ErrorResponse(e.getMessage(), INTERNAL_SERVER_ERROR.toString());
     }
-
-
 }

@@ -7,6 +7,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import ru.practicum.shareit.user.model.User;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @NoArgsConstructor
@@ -16,10 +17,10 @@ public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
+    @NotNull
     @Column(name = "name", nullable = false)
     private String name;
-
+    @NotNull
     @Column(name = "description", nullable = false)
     private String description;
     @Column(name = "isAvailable", nullable = false)
@@ -29,4 +30,6 @@ public class Item {
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User owner;
+
+    private long request;
 }
