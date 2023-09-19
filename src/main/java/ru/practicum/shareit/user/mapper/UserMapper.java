@@ -19,7 +19,7 @@ public class UserMapper {
         return user;
     }
 
-    public static UserDto convertToDto(User user){
+    public static UserDto convertToDto(User user) {
         return UserDto.builder()
                 .id(user.getId())
                 .name(user.getName())

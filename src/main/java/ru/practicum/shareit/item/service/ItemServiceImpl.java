@@ -89,10 +89,10 @@ public class ItemServiceImpl implements ItemService {
         ItemDto itemDto = utils.convertToDto(item);
 
         if (item.getOwner().getId() == userId) {
-            Optional<Booking> lastBooking = Optional.ofNullable
-                    (bookingService.getLastBookingForItem(itemDto.getId()));
-            Optional<Booking> nextBooking = Optional.ofNullable
-                    (bookingService.getNextBookingForItem(itemDto.getId()));
+            Optional<Booking> lastBooking = Optional.ofNullable(
+                    bookingService.getLastBookingForItem(itemDto.getId()));
+            Optional<Booking> nextBooking = Optional.ofNullable(
+                    bookingService.getNextBookingForItem(itemDto.getId()));
             lastBooking.ifPresent(booking -> itemDto.setLastBooking(BookingMapper.convertToBookingLink(lastBooking.get())));
             nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToBookingLink(nextBooking.get())));
         }
@@ -126,14 +126,14 @@ public class ItemServiceImpl implements ItemService {
         return items.stream()
                 .map(ItemMapper::convertToDto)
                 .map(itemDto -> {
-                    Optional<Booking> lastBooking = Optional.ofNullable
-                            (bookingService.getLastBookingForItem(itemDto.getId()));
+                    Optional<Booking> lastBooking = Optional.ofNullable(
+                            bookingService.getLastBookingForItem(itemDto.getId()));
                     lastBooking.ifPresent(booking -> itemDto.setLastBooking(BookingMapper.convertToBookingLink(lastBooking.get())));
                     return itemDto;
                 })
                 .map(itemDto -> {
-                    Optional<Booking> nextBooking = Optional.ofNullable
-                            (bookingService.getNextBookingForItem(itemDto.getId()));
+                    Optional<Booking> nextBooking = Optional.ofNullable(
+                            bookingService.getNextBookingForItem(itemDto.getId()));
                     nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToBookingLink(nextBooking.get())));
                     return itemDto;
                 })
@@ -165,14 +165,14 @@ public class ItemServiceImpl implements ItemService {
         return items.stream()
                 .map(ItemMapper::convertToDto)
                 .map(itemDto -> {
-                    Optional<Booking> lastBooking = Optional.ofNullable
-                            (bookingService.getLastBookingForItem(itemDto.getId()));
+                    Optional<Booking> lastBooking = Optional.ofNullable(
+                            bookingService.getLastBookingForItem(itemDto.getId()));
                     lastBooking.ifPresent(booking -> itemDto.setLastBooking(BookingMapper.convertToBookingLink(lastBooking.get())));
                     return itemDto;
                 })
                 .map(itemDto -> {
-                    Optional<Booking> nextBooking = Optional.ofNullable
-                            (bookingService.getNextBookingForItem(itemDto.getId()));
+                    Optional<Booking> nextBooking = Optional.ofNullable(
+                            bookingService.getNextBookingForItem(itemDto.getId()));
                     nextBooking.ifPresent(booking -> itemDto.setNextBooking(BookingMapper.convertToBookingLink(nextBooking.get())));
                     return itemDto;
                 })
@@ -214,8 +214,8 @@ public class ItemServiceImpl implements ItemService {
         if (text.isBlank()) {
             return new ArrayList<>();
         }
-        Page<Item> items = itemRepository.findAllByDescriptionContainsIgnoreCase
-                (text, PageRequest.of(from / size, size));
+        Page<Item> items = itemRepository.findAllByDescriptionContainsIgnoreCase(
+                text, PageRequest.of(from / size, size));
 
         return items.stream()
                 .filter(Item::getIsAvailable)
