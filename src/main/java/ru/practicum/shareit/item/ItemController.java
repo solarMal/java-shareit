@@ -1,74 +1,54 @@
 package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.Comment.model.CommentDto;
+import ru.practicum.shareit.comment.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
-import ru.practicum.shareit.item.service.ItemService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
-@RequestMapping("/items")
+@RequestMapping(path = "/items")
 @RequiredArgsConstructor
-@Slf4j
 public class ItemController {
-    private final ItemService itemService;
 
-    @PostMapping
-    public ItemDto addItem(@RequestHeader("X-Sharer-User-Id") long userId,
-                           @RequestBody ItemDto itemDto) {
-        log.debug("Received request to add new Item from user {}.", userId);
+    private static final String USER_HEADER = "X-Sharer-User-Id";
+    private final ItemService service;
 
-        return itemService.addItem(userId, itemDto);
-    }
-
-    @PostMapping("/{itemId}/comment")
-    public CommentDto addComment(@RequestHeader("X-Sharer-User-Id") long userId,
-                                 @PathVariable(value = "itemId") long itemId,
-                                 @RequestBody CommentDto commentDto) {
-        log.debug("Received request to add new comment from user {} to item {}.", userId, itemId);
-        return itemService.addComment(userId, itemId, commentDto);
-    }
-
-    @PatchMapping("/{itemId}")
-    public ItemDto updateItem(@RequestHeader("X-Sharer-User-Id") long userId,
-                              @RequestBody ItemDto itemDto,
-                              @PathVariable(value = "itemId") long itemId) {
-        log.debug("Received request to update existed Item with id {} from user id {}.", itemId, userId);
-        itemDto.setId(itemId);
-        return itemService.updateItem(userId, itemDto);
+    @GetMapping
+    public List<ItemDto> findAllByUserId(@RequestHeader(USER_HEADER) Integer userId) {
+        return service.findAllByUserId(userId);
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getById(@RequestHeader("X-Sharer-User-Id") long userId,
-                           @PathVariable(value = "itemId") long itemId) {
-        log.debug("Received request to get existed Item with id {}.", itemId);
-
-        return itemService.getItemDtoById(itemId, userId);
+    public ItemDto findById(@PathVariable Integer itemId,
+                            @RequestHeader(USER_HEADER) Integer userId) {
+        return service.findById(itemId, userId);
     }
 
-    @GetMapping
-    public List<ItemDto> getUserItems(@RequestHeader("X-Sharer-User-Id") long userId,
-                                      @RequestParam(value = "from", required = false) Integer from,
-                                      @RequestParam(value = "size", required = false) Integer size) {
-        log.debug("Received request to get items list by user id {}.", userId);
-        if (from != null && size != null) {
-            return itemService.getItemsByUserIdPagination(userId, from, size);
-        }
-        return itemService.getItemsByUserId(userId);
+    @PostMapping
+    public ItemDto create(@Valid @RequestBody ItemDto itemDto,
+                          @RequestHeader(USER_HEADER) Integer userId) {
+        return service.create(itemDto, userId);
+    }
+
+    @PatchMapping("/{itemId}")
+    public ItemDto update(@RequestBody ItemDto itemDto,
+                          @PathVariable Integer itemId,
+                          @RequestHeader(USER_HEADER) Integer userId) {
+        return service.update(itemDto, itemId, userId);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> searchForItems(@RequestParam String text,
-                                        @RequestParam(value = "from", required = false) Integer from,
-                                        @RequestParam(value = "size", required = false) Integer size) {
-        log.debug("Received request for search items by description with text: \"{}\"", text);
-        if (from != null && size != null) {
-            return itemService.searchInDescriptionPagination(text, from, size);
-        }
-        return itemService.searchInDescription(text);
+    public List<ItemDto> findByText(@RequestParam(required = false, name = "text") String text) {
+        return service.findByText(text);
     }
 
+    @PostMapping("/{itemId}/comment")
+    public CommentDto addComment(@RequestHeader(USER_HEADER) Integer userId,
+                           @PathVariable Integer itemId,
+                           @Valid @RequestBody CommentDto commentDto) {
+        return service.addComment(userId, itemId, commentDto);
+    }
 }

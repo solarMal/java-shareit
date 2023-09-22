@@ -1,54 +1,43 @@
 package ru.practicum.shareit.request;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
-import ru.practicum.shareit.request.service.ItemRequestService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping(path = "/requests")
 @RequiredArgsConstructor
-@Slf4j
 public class ItemRequestController {
-    private final ItemRequestService requestService;
 
-    @PostMapping
-    public ItemRequestDto addNewRequest(@RequestHeader("X-Sharer-User-Id") long userId,
-                                        @RequestBody ItemRequestDto itemRequestDto) {
-        log.debug("Received request to add new ItemRequest.");
-
-        return requestService.addNewRequest(userId, itemRequestDto);
-    }
+    private static final String USER_HEADER = "X-Sharer-User-Id";
+    private final ItemRequestService service;
 
     @GetMapping
-    public List<ItemRequestDto> getUsersRequests(@RequestHeader("X-Sharer-User-Id") long userId) {
-        log.debug("Received request to get user {} request list.", userId);
-
-        return requestService.getUserRequests(userId);
-    }
-
-    @GetMapping("/all")
-    public List<ItemRequestDto> getOtherUsersExistingRequestsPagination(
-             @RequestHeader("X-Sharer-User-Id") long userId,
-             @RequestParam(value = "from", required = false) Integer from,
-             @RequestParam(value = "size", required = false) Integer size) {
-        log.debug("Received request from user {} to get other users ItemsRequests.", userId);
-
-        if (from != null && size != null) {
-            return requestService.getOtherUsersRequestsPagination(userId, from, size);
-        }
-
-        return requestService.getOtherUsersRequests(userId);
+    public List<ItemRequestDto> findAllByUserId(@RequestHeader(USER_HEADER) Integer userId) {
+        return service.findAllByUserId(userId);
     }
 
     @GetMapping("/{requestId}")
-    public ItemRequestDto getRequest(@RequestHeader("X-Sharer-User-Id") long userId,
-                                     @PathVariable(value = "requestId") long requestId) {
-        log.debug("Received request to get request {}.", requestId);
+    public ItemRequestDto findById(@RequestHeader(USER_HEADER) Integer userId,
+                                   @PathVariable("requestId") Integer requestId) {
+        return service.findById(userId, requestId);
+    }
 
-        return requestService.getRequest(userId, requestId);
+    @GetMapping("/all")
+    public List<ItemRequestDto> findAllByParams(@RequestHeader(USER_HEADER) Integer userId,
+                                                @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                @RequestParam(name = "size", defaultValue = "10") Integer size) {
+        return service.findAllByParams(userId, PageRequest.of(from, size, Sort.by("created").descending()));
+    }
+
+    @PostMapping
+    public ItemRequestDto create(@Valid @RequestBody ItemRequestDto itemRequestDto,
+                                 @RequestHeader(USER_HEADER) Integer userId) {
+        return service.create(itemRequestDto, userId);
     }
 }
