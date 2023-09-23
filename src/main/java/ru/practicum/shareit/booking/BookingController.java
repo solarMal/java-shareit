@@ -1,58 +1,52 @@
 package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
-import ru.practicum.shareit.booking.service.BookingService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping(path = "/bookings")
 @RequiredArgsConstructor
-@Slf4j
 public class BookingController {
-    private final BookingService bookingService;
 
-    @PostMapping
-    public BookingDto createBooking(@RequestHeader("X-Sharer-User-Id") long userId,
-                                    @RequestBody BookingDto bookingDto) {
-        log.debug("Received request to create new booking from user {}.", userId);
+    private static final String USER_HEADER = "X-Sharer-User-Id";
+    private final BookingService service;
 
-        return bookingService.createBooking(userId, bookingDto);
-    }
-
-    @PatchMapping("/{bookingId}")
-    public BookingDto changeItemStatus(@RequestHeader("X-Sharer-User-Id") long userId,
-                                       @PathVariable(value = "bookingId") long bookingId,
-                                       @RequestParam(required = true) boolean approved) {
-        log.debug("Received request from user {} to change status to {} in booking {}.", userId, approved, bookingId);
-
-        return bookingService.setStatus(userId, bookingId, approved);
-    }
-
-    @GetMapping("/{bookingId}")
-    public BookingDto getInfoAboutBooking(@RequestHeader("X-Sharer-User-Id") long userId,
-                                          @PathVariable(value = "bookingId") long bookingId) {
-        log.debug("Received request to get info about booking {} from user {}.", userId, bookingId);
-
-        return bookingService.getBookingInfo(userId, bookingId);
-    }
-
-    @GetMapping()
-    public List<BookingDto> getUsersBookings(@RequestHeader("X-Sharer-User-Id") long userId,
-                                             @RequestParam(defaultValue = "ALL") String state) {
-        log.debug("Received request to get bookings of user {}.", userId);
-
-        return bookingService.getUsersBookings(userId, state);
+    @GetMapping
+    public List<BookingDto> findAllByBookerAndState(@RequestHeader(USER_HEADER) Integer bookerId,
+                                                    @RequestParam(required = false, defaultValue = "ALL") String state,
+                                                    @RequestParam(value = "from", required = false, defaultValue = "0") Integer from,
+                                                    @RequestParam(value = "size", required = false, defaultValue = "10") Integer size) {
+        return service.findAllByBookerAndState(bookerId, state, from, size);
     }
 
     @GetMapping("/owner")
-    public List<BookingDto> getUsersItemsBookings(@RequestHeader("X-Sharer-User-Id") long userId,
-                                                  @RequestParam(defaultValue = "ALL") String state) {
-        log.debug("Received request to get user {} items bookings.", userId);
+    public List<BookingDto> findAllByOwnerAndState(@RequestHeader(USER_HEADER) Integer ownerId,
+                                                   @RequestParam(required = false) String state,
+                                                   @RequestParam(value = "from", required = false, defaultValue = "0") Integer from,
+                                                   @RequestParam(value = "size", required = false, defaultValue = "10") Integer size) {
+        return service.findAllByOwnerAndState(ownerId, state, from, size);
+    }
 
-        return bookingService.getUsersItemsBookings(userId, state);
+    @GetMapping("{bookingId}")
+    public BookingDto findById(@RequestHeader(USER_HEADER) Integer userId,
+                               @PathVariable Integer bookingId) {
+        return service.findById(userId, bookingId);
+    }
+
+    @PostMapping
+    public BookingDto create(@RequestHeader(USER_HEADER) Integer userId,
+                             @Valid @RequestBody BookingDto bookingDto) {
+        return service.create(userId, bookingDto);
+    }
+
+    @PatchMapping("/{bookingId}")
+    public BookingDto updateStatus(@RequestHeader(USER_HEADER) Integer userId,
+                                   @PathVariable Integer bookingId,
+                                   @RequestParam Boolean approved) {
+        return service.updateStatus(userId, bookingId, approved);
     }
 }
