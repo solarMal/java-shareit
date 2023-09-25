@@ -5,6 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.entity.Booking;
@@ -48,14 +50,14 @@ public class ItemServiceImplTest {
     void findAllByUserId() {
         Item item1 = Item.builder().id(1).build();
         Item item2 = Item.builder().id(2).build();
-        when(itemRepository.findAllByOwnerId(anyInt())).thenReturn(List.of(item1, item2));
-        List<ItemDto> result = service.findAllByUserId(1);
+        when(itemRepository.findAllByOwnerId(anyInt(), any(Pageable.class))).thenReturn(new PageImpl<>(List.of(item1, item2)));
+        List<ItemDto> result = service.findAllByUserId(1, 1, 1);
         ItemDto itemDto1 = toItemDto(item1);
         itemDto1.setComments(Collections.emptyList());
         ItemDto itemDto2 = toItemDto(item2);
         itemDto2.setComments(Collections.emptyList());
         assertArrayEquals(List.of(itemDto1, itemDto2).toArray(), result.toArray());
-        verify(itemRepository, times(1)).findAllByOwnerId(anyInt());
+        verify(itemRepository, times(1)).findAllByOwnerId(anyInt(), any(Pageable.class));
     }
 
     @Test
@@ -238,25 +240,23 @@ public class ItemServiceImplTest {
 
     @Test
     void findByText() {
-        Item item1 = Item.builder()
-                .description("text")
-                .name("name")
+        Item item = Item.builder()
+                .id(1)
+                .name("item")
+                .description("description")
+                .owner(User.builder().id(2).build())
                 .available(true)
                 .build();
-        Item item2 = Item.builder()
-                .description("test")
-                .name("name2")
-                .available(true)
-                .build();
-        when(itemRepository.findAll()).thenReturn(List.of(item1, item2));
-        List<ItemDto> itemDtoList = service.findByText("test");
-        assertArrayEquals(List.of(toItemDto(item2)).toArray(), itemDtoList.toArray());
-        verify(itemRepository, times(1)).findAll();
+        when(itemRepository.findText(anyString(), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(item)));
+        List<ItemDto> result = service.findByText("description", 1, 1);
+        assertNotNull(result);
+        assertEquals(1, result.get(0).getId());
     }
 
     @Test
     void findByEmptyText() {
-        assertArrayEquals(Collections.emptyList().toArray(), service.findByText("").toArray());
+        assertArrayEquals(Collections.emptyList().toArray(), service.findByText("", 1, 1).toArray());
     }
 
     @Test

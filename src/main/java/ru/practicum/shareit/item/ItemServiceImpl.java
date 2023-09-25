@@ -2,6 +2,8 @@ package ru.practicum.shareit.item;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingRepository;
@@ -41,8 +43,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> findAllByUserId(Integer userId) {
-        return itemRepository.findAllByOwnerId(userId).stream()
+    public List<ItemDto> findAllByUserId(Integer userId, Integer from, Integer size) {
+        Pageable pageable = PageRequest.of(from / size, size);
+        List<Item> items = itemRepository.findAllByOwnerId(userId, pageable).toList();
+        return items.stream()
                 .map(ItemMapper::toItemDto)
                 .map(this::addCommentsDto)
                 .map(this::addBookings)
@@ -123,15 +127,15 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ItemDto> findByText(String text) {
+    public List<ItemDto> findByText(String text, Integer from, Integer size) {
         if (text.isBlank()) {
             return Collections.emptyList();
         } else {
-            return findAllItemDtoByFilter(
-                    item -> (StringUtils.containsIgnoreCase(item.getName(), text)
-                            || StringUtils.containsIgnoreCase(item.getDescription(), text)
-                            && item.getAvailable())
-            );
+            Pageable pageable = PageRequest.of(from / size, size);
+            List<Item> items = itemRepository.findText(text, pageable).toList();
+            return items.stream()
+                    .map(ItemMapper::toItemDto)
+                    .collect(Collectors.toList());
         }
     }
 

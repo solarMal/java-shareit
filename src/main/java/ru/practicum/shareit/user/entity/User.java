@@ -21,12 +21,9 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotBlank
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Email
-    @NotBlank
     @Column(name = "email", nullable = false, length = 320)
     private String email;
 }

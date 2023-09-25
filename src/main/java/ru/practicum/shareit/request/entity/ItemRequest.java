@@ -28,7 +28,6 @@ public class ItemRequest {
     private String description;
     @JoinColumn(name = "requester_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @NotNull
     @ManyToOne
     private User requester;
     @CreationTimestamp

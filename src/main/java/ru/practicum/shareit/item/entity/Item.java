@@ -23,11 +23,9 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotBlank
     @Column(name = "name", nullable = false)
     private String name;
 
-    @NotBlank
     @Column(name = "description", nullable = false)
     private String description;
 
@@ -37,7 +35,6 @@ public class Item {
     @JoinColumn(name = "owner_id", nullable = false)
     @ManyToOne(fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @NotNull
     @JsonIgnore
     @ToString.Exclude
     private User owner;

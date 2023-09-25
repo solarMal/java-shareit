@@ -35,13 +35,11 @@ public class Booking {
     @ManyToOne
     @JoinColumn(name = "item_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @NotNull
     private Item item;
 
     @ManyToOne
     @JoinColumn(name = "booker_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @NotNull
     private User booker;
 
     @Enumerated(EnumType.STRING)
