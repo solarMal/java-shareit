@@ -4,8 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.booking.entity.Booking;
 import ru.practicum.shareit.item.ItemRepository;
 import ru.practicum.shareit.item.entity.Item;
@@ -15,7 +13,8 @@ import ru.practicum.shareit.user.entity.User;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @DataJpaTest
 public class BookingRepositoryTest {
