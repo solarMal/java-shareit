@@ -10,7 +10,6 @@ import org.hibernate.annotations.OnDeleteAction;
 import ru.practicum.shareit.user.entity.User;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Data
@@ -28,7 +27,6 @@ public class ItemRequest {
     private String description;
     @JoinColumn(name = "requester_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
-    @NotNull
     @ManyToOne
     private User requester;
     @CreationTimestamp

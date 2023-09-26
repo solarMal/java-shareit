@@ -48,11 +48,11 @@ public class ItemControllerTest {
 
     @Test
     void findAllByUserId() throws Exception {
-        when(service.findAllByUserId(anyInt())).thenReturn(List.of(itemDto));
+        when(service.findAllByUserId(anyInt(), anyInt(), anyInt())).thenReturn(List.of(itemDto));
         mockMvc.perform(get("/items")
-                        .header(USER_HEADER, 1)
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+                .header(USER_HEADER, 1)
+                .characterEncoding(StandardCharsets.UTF_8)
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id", is(itemDto.getId()), Integer.class))
                 .andExpect(jsonPath("$.[0].name", is(itemDto.getName())))
@@ -108,12 +108,12 @@ public class ItemControllerTest {
 
     @Test
     void findByText() throws Exception {
-        when(service.findByText(anyString())).thenReturn(List.of(itemDto));
+        when(service.findByText(anyString(), anyInt(), anyInt())).thenReturn(List.of(itemDto));
         mockMvc.perform(get("/items/search")
-                        .header(USER_HEADER, 1)
-                        .param("text", "text")
-                        .characterEncoding(StandardCharsets.UTF_8)
-                        .accept(MediaType.APPLICATION_JSON))
+                .header(USER_HEADER, 1)
+                .param("text", "text")
+                .characterEncoding(StandardCharsets.UTF_8)
+                .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.[0].id", is(itemDto.getId()), Integer.class))
                 .andExpect(jsonPath("$.[0].name", is(itemDto.getName())))
